@@ -1,5 +1,7 @@
 package com.cylee.web;
 
+import com.cylee.socket.tcp.ConnectManager;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -11,7 +13,7 @@ import javax.servlet.annotation.WebListener;
 public class ContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        Log.d("contextInit-->"+servletContextEvent.getServletContext());
+        new Thread(ConnectManager.getInstance().init(8989)).start();
     }
 
     @Override
