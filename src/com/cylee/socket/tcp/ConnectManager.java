@@ -31,6 +31,10 @@ public class ConnectManager implements Runnable {
         return this;
     }
 
+    public DataChannel getChannel(String id) {
+        return mClients.get(id);
+    }
+
     public void registerClientChannel(DataChannel channel) {
         if (channel != null && channel.address != null) {
             mClients.put(channel.address.appid, channel);
