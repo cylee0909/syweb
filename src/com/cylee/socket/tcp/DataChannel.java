@@ -10,7 +10,7 @@ import java.util.*;
  * Created by cylee on 16/9/25.
  */
 public class DataChannel implements TcpSocketReader.ReadListener{
-    private static final int DEFAULT_TIMEOUT = 5000; // 5s
+    private static final int DEFAULT_TIMEOUT = 6000; // 5s
     private static final int ERROR_DATA_INVALID = -1;
     private static final int ERROR_SEND_ERROR = -2;
     private static final int ERROR_TIME_OUT = -3;
@@ -171,7 +171,7 @@ public class DataChannel implements TcpSocketReader.ReadListener{
         public void run() {
             while (!mStoped) {
                 try {
-                    Thread.sleep(mTimeOut / 3);
+                    Thread.sleep(mTimeOut / 2);
                 } catch (InterruptedException e){
                     e.printStackTrace();
                 }
@@ -182,7 +182,7 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                         String id = iterator.next();
                         PacketBindData pb = mBindDataMap.get(id);
                         if (pb.senTime + mTimeOut <= System.currentTimeMillis()) { // 超时
-                            if (pb.mRetryCount > 2) {
+                            if (pb.mRetryCount >= 2) {
                                 if (pb.mListener != null) {
                                     pb.mListener.onError(ERROR_TIME_OUT);
                                 }

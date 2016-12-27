@@ -1,9 +1,8 @@
 package com.cylee.smarthome;
 
 import com.cylee.smarthome.model.BaseModel;
-import com.cylee.smarthome.model.Verify;
-import com.cylee.smarthome.util.EncryptUtil;
-import com.cylee.web.Log;
+import com.cylee.smarthome.model.Login;
+import com.cylee.socket.tcp.ConnectManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -14,27 +13,31 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * Created by cylee on 16/12/18.
+ * Created by cylee on 16/12/25.
  */
-@WebServlet("/verify")
-public class VerifyServlet extends HttpServlet{
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doPost(req,resp);
+        doPost(req, resp);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String id = req.getParameter("id");
+        String name = req.getParameter("loginName");
+        String passd = req.getParameter("loginPassd");
         BaseModel result = null;
-        if (id != null) {
-            Verify verify = new Verify();
-            verify.setResult(EncryptUtil.getVerify(id));
-            result = BaseModel.buildSuccess(verify);
-        } else {
+        if (name != null && passd != null) {
+            String id = ConnectManager.getInstance().getLoginId(name, passd);
+            if (id != null) {
+                Login login = new Login();
+                login.id = id;
+                result = BaseModel.buildSuccess(login);
+            }
+        }
+        if (result == null) {
             result = BaseModel.buildInvalidInput();
         }
-        Log.d("id = "+id);
         PrintWriter out = resp.getWriter();
         out.write(result.toJson());
         out.flush();

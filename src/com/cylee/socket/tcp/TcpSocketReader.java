@@ -56,6 +56,13 @@ public class TcpSocketReader implements Runnable{
                 }
             } catch (Exception e){
                 e.printStackTrace();
+                mNullCount ++;
+                if (mNullCount >= NULL_COUNT_CLOSE) {
+                    if (mReadListener != null) {
+                        mReadListener.onReadClose();
+                    }
+                    stop();
+                }
             }
         }
     }

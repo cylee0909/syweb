@@ -5,6 +5,7 @@ import com.cylee.smarthome.model.ExecMode;
 import com.cylee.socket.tcp.ConnectManager;
 import com.cylee.socket.tcp.DataChannel;
 import com.cylee.socket.tcp.SendDataListener;
+import com.cylee.web.Log;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
@@ -27,6 +28,7 @@ public class ExecCommand extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setCharacterEncoding("utf-8");
         String id = req.getParameter("appid");
         BaseModel result = null;
         if (id != null && !"".equals(id)) {
@@ -34,9 +36,11 @@ public class ExecCommand extends HttpServlet {
             if (channel != null) {
                 String command = req.getParameter("command");
                 final AsyncContext context = req.startAsync();
+                Log.d("exec command = "+command);
                 channel.sendString("EXEC_" + command, new SendDataListener() {
                     @Override
                     public void onError(int errorCode) {
+                        Log.d("exec command = "+command+" error = "+errorCode);
                         try {
                             PrintWriter wirter = context.getResponse().getWriter();
                             ExecMode mode = new ExecMode();
@@ -51,6 +55,7 @@ public class ExecCommand extends HttpServlet {
 
                     @Override
                     public void onSuccess(String data) {
+                        Log.d("exec command = "+command+" response = "+data);
                         try {
                             PrintWriter wirter = context.getResponse().getWriter();
                             ExecMode mode = new ExecMode();

@@ -1,8 +1,12 @@
 package com.cylee.socket.tcp;
 
+import com.sun.tools.classfile.Opcode;
+import com.sun.tools.corba.se.idl.StringGen;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,5 +76,20 @@ public class ConnectManager implements Runnable {
 
     public void stop() {
         mStoped = true;
+    }
+
+    public String getLoginId(String name, String passd) {
+        if (mClients != null) {
+            Collection<DataChannel> data = mClients.values();
+            if (data != null) {
+                for (DataChannel channel :
+                        data) {
+                    if (channel != null && channel.address != null && channel.address.matchLogin(name, passd)) {
+                        return channel.address.appid;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
