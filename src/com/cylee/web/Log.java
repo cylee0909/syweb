@@ -5,6 +5,6 @@ package com.cylee.web;
  */
 public class Log {
     public static void d(String msg) {
-        System.out.println(msg);
+//        System.out.println(msg);
     }
 }

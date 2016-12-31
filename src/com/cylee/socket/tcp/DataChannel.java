@@ -182,7 +182,7 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                         String id = iterator.next();
                         PacketBindData pb = mBindDataMap.get(id);
                         if (pb.senTime + mTimeOut <= System.currentTimeMillis()) { // 超时
-                            if (pb.mRetryCount >= 2) {
+                            if (pb.mRetryCount >= 0) {
                                 if (pb.mListener != null) {
                                     pb.mListener.onError(ERROR_TIME_OUT);
                                 }
