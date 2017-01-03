@@ -7,7 +7,7 @@ import com.cylee.smarthome.util.GsonBuilderFactory;
  */
 public class ClientAddress {
     public String appid;
-    public int vcl;
+    public int vc;
     public String vName;
     public String loginPassd;
     public String loginName;

@@ -28,6 +28,7 @@ public class ConfigServlet extends HttpServlet{
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String id = req.getParameter("id");
         BaseModel result = null;
+        Log.d("config id = "+id);
         if (id != null) {
             Config config = new Config();
             config.setVerify(false);
@@ -35,7 +36,6 @@ public class ConfigServlet extends HttpServlet{
         } else {
             result = BaseModel.buildInvalidInput();
         }
-        Log.d("id = "+id);
         PrintWriter out = resp.getWriter();
         out.write(result.toJson());
         out.flush();

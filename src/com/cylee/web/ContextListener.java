@@ -13,11 +13,11 @@ import javax.servlet.annotation.WebListener;
 public class ContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+        Log.d("contextInitial-->"+servletContextEvent.getServletContext());
         new Thread(ConnectManager.getInstance().init(8989)).start();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        Log.d("contextDestroyed-->"+servletContextEvent.getServletContext());
     }
 }

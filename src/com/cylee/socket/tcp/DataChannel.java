@@ -101,13 +101,13 @@ public class DataChannel implements TcpSocketReader.ReadListener{
 
     @Override
     public void onReceive(String receiveData) {
-        Log.d("receive data = "+receiveData);
         if (receiveData != null) {
             if (receiveData.startsWith("SETID")) {
                 String addressDataWithId = receiveData.substring(5);
                 if (addressDataWithId.length() > 2) {
                     String addressData = addressDataWithId.substring(2);
                     String id = addressDataWithId.substring(0, 2);
+                    Log.d("rec SETID address = "+addressData);
                     address = ClientAddress.fromJson(addressData);
                     if (address != null) {
                         try {

@@ -27,6 +27,7 @@ public class VerifyServlet extends HttpServlet{
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String id = req.getParameter("id");
         BaseModel result = null;
+        Log.d("verify id = "+id);
         if (id != null) {
             Verify verify = new Verify();
             verify.setResult(EncryptUtil.getVerify(id));
@@ -34,7 +35,6 @@ public class VerifyServlet extends HttpServlet{
         } else {
             result = BaseModel.buildInvalidInput();
         }
-        Log.d("id = "+id);
         PrintWriter out = resp.getWriter();
         out.write(result.toJson());
         out.flush();

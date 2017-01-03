@@ -3,6 +3,7 @@ package com.cylee.smarthome;
 import com.cylee.smarthome.model.BaseModel;
 import com.cylee.smarthome.model.Login;
 import com.cylee.socket.tcp.ConnectManager;
+import com.cylee.web.Log;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,6 +30,7 @@ public class LoginServlet extends HttpServlet {
         BaseModel result = null;
         if (name != null && passd != null) {
             String id = ConnectManager.getInstance().getLoginId(name, passd);
+            Log.d("login, name = "+name+" id = "+id);
             if (id != null) {
                 Login login = new Login();
                 login.id = id;

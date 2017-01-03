@@ -1,7 +1,6 @@
 package com.cylee.socket.tcp;
 
-import com.sun.tools.classfile.Opcode;
-import com.sun.tools.corba.se.idl.StringGen;
+import com.cylee.web.Log;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -41,6 +40,7 @@ public class ConnectManager implements Runnable {
 
     public void registerClientChannel(DataChannel channel) {
         if (channel != null && channel.address != null) {
+            Log.d("register, name = "+channel.address.loginName+" id = "+channel.address.appid);
             mClients.put(channel.address.appid, channel);
         }
     }
