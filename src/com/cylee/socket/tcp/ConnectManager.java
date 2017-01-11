@@ -5,10 +5,7 @@ import com.cylee.web.Log;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by cylee on 16/12/19.
@@ -36,6 +33,10 @@ public class ConnectManager implements Runnable {
 
     public DataChannel getChannel(String id) {
         return mClients.get(id);
+    }
+
+    public Map<String, DataChannel> allChannels() {
+        return mClients;
     }
 
     public void registerClientChannel(DataChannel channel) {
