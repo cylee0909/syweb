@@ -8,13 +8,12 @@ import java.net.Socket;
  * Created by cylee on 16/10/3.
  */
 
-public class TcpSocketReader implements Runnable{
+public class TcpSocketReader implements Runnable {
     private BufferedReader mBR;
     private volatile boolean mStoped;
     private ReadListener mReadListener;
     private Socket mSocket;
-    private int NULL_COUNT_CLOSE = 10; // 连续10个null即关闭channel
-    private int mNullCount;
+
     TcpSocketReader(Socket socket) throws Exception {
         mBR = new BufferedReader(
                 new InputStreamReader(socket.getInputStream(), "utf-8"));
@@ -44,25 +43,18 @@ public class TcpSocketReader implements Runnable{
                     if (mReadListener != null) {
                         mReadListener.onReceive(current);
                     }
-                    mNullCount = 0;
                 } else {
-                    mNullCount ++;
-                    if (mNullCount >= NULL_COUNT_CLOSE) {
-                        if (mReadListener != null) {
-                            mReadListener.onReadClose();
-                        }
-                        stop();
-                    }
-                }
-            } catch (Exception e){
-                e.printStackTrace();
-                mNullCount ++;
-                if (mNullCount >= NULL_COUNT_CLOSE) {
                     if (mReadListener != null) {
                         mReadListener.onReadClose();
                     }
                     stop();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                if (mReadListener != null) {
+                    mReadListener.onReadClose();
+                }
+                stop();
             }
         }
     }
@@ -75,6 +67,7 @@ public class TcpSocketReader implements Runnable{
             } catch (Exception e) {
             }
         }
+        Thread.currentThread().interrupt();
     }
 
     public interface ReadListener {

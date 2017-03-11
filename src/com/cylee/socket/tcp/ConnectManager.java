@@ -39,16 +39,10 @@ public class ConnectManager implements Runnable {
         return mClients;
     }
 
-    public void registerClientChannel(DataChannel channel) {
-        if (channel != null && channel.address != null) {
-            Log.d("register, name = "+channel.address.loginName+" id = "+channel.address.appid);
-            mClients.put(channel.address.appid, channel);
-        }
-    }
-
-    public void removeChannel(DataChannel channel) {
-        if (channel != null && channel.address != null) {
-            mClients.remove(channel.address.appid);
+    public void registerClientChannel(String id, DataChannel channel) {
+        if (channel != null) {
+            Log.d("register, id = "+ id);
+            mClients.put(id, channel);
         }
     }
 
@@ -65,32 +59,39 @@ public class ConnectManager implements Runnable {
         mSocket = new ServerSocket(port);
         while (!mStoped) {
             Socket socket = mSocket.accept();
+            TcpSocketReader reader = null;
+            DataChannel channel = null;
             try {
-                TcpSocketReader reader = new TcpSocketReader(socket);
-                reader.registerChannel(new DataChannel());
+                reader = new TcpSocketReader(socket);
+                channel = new DataChannel();
+                reader.registerChannel(channel);
                 new Thread(reader).start();
             } catch (Exception e) {
                 e.printStackTrace();
+                if (reader != null) {
+                    reader.stop();
+                }
+                if (channel != null) {
+                    channel.closeChannel();
+                }
             }
         }
     }
 
     public void stop() {
         mStoped = true;
-    }
-
-    public String getLoginId(String name, String passd) {
         if (mClients != null) {
-            Collection<DataChannel> data = mClients.values();
-            if (data != null) {
-                for (DataChannel channel :
-                        data) {
-                    if (channel != null && channel.address != null && channel.address.matchLogin(name, passd)) {
-                        return channel.address.appid;
-                    }
+            for (DataChannel channel : mClients.values()) {
+                if (channel != null) {
+                    channel.closeChannel();
                 }
             }
         }
-        return null;
+        if (mSocket != null) {
+            try {
+                mSocket.close();
+            } catch (Exception e) {
+            }
+        }
     }
 }

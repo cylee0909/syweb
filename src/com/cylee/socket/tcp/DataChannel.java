@@ -1,8 +1,5 @@
 package com.cylee.socket.tcp;
 
-import com.cylee.smarthome.model.ClientAddress;
-import com.cylee.web.Log;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -18,9 +15,8 @@ public class DataChannel implements TcpSocketReader.ReadListener{
 
     TcpSocketReader reader;
     TcpSocketWriter writer;
-    ClientAddress address;
 
-    private boolean mStoped;
+    private volatile boolean mStoped;
     public Map<String, PacketBindData> mBindDataMap = Collections.synchronizedMap(new HashMap<String, PacketBindData>());
     private int mId;
 
@@ -64,23 +60,7 @@ public class DataChannel implements TcpSocketReader.ReadListener{
     }
 
     private String correctLength(String rawData, String id) {
-        if (rawData == null || id == null) return  "";
-        int len = rawData.length();
-        if (len < 5) { // 不足5位,补齐
-            for (int i = 0; i < 5 - len; i++) {
-                rawData = rawData.concat("0");
-            }
-        }
-
-        String op = rawData.substring(0, 5); // 前五位为指令码
-        String data = rawData.substring(5);
-        String result = op + id + data;
-        if (len < 6) { // 不足6位,补齐
-            for (int i = 0; i < 6 - len; i++) {
-                result = result.concat("0");
-            }
-        }
-        return result+"^";
+        return "#"+id+rawData;
     }
 
     public void closeChannel() {
@@ -91,7 +71,6 @@ public class DataChannel implements TcpSocketReader.ReadListener{
             reader.stop();
         }
         mStoped = true;
-        ConnectManager.getInstance().removeChannel(this);
     }
 
     @Override
@@ -102,36 +81,25 @@ public class DataChannel implements TcpSocketReader.ReadListener{
     @Override
     public void onReceive(String receiveData) {
         if (receiveData != null) {
-            if (receiveData.startsWith("SETID")) {
-                String addressDataWithId = receiveData.substring(5);
-                if (addressDataWithId.length() > 2) {
-                    String addressData = addressDataWithId.substring(2);
+            if (receiveData.startsWith("INIT")) {
+                String addressDataWithId = receiveData.substring(4);
+                if (addressDataWithId.length() >= 2) {
                     String id = addressDataWithId.substring(0, 2);
-                    Log.d("rec SETID address = "+addressData);
-                    address = ClientAddress.fromJson(addressData);
-                    if (address != null) {
-                        try {
-                            writer = new TcpSocketWriter(reader.getSocket());
-                            new Thread(writer).start();
-                            new Thread(new TimeOutChecker()).start();
-                        } catch (IOException e){
-                            e.printStackTrace();
-                            mStoped = true;
-                            try {
-                                reader.stop();
-                                reader.getSocket().close();
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            }
-                            return;
-                        }
-                        ConnectManager.getInstance().registerClientChannel(this);
-                        writer.offerData(id + "OK^");
+                    // 老的连接还在,但是客户端再次初始化了,我们关闭之前的连接
+                    DataChannel oldChannel = ConnectManager.getInstance().getChannel("INIT");
+                    if (oldChannel != null) {
+                        oldChannel.closeChannel();
                     }
-                }
-            } else if (receiveData.startsWith("HEART")) {
-                if (receiveData.length() >= 7) {
-                    String id = receiveData.substring(5, 7);
+                    try {
+                        writer = new TcpSocketWriter(reader.getSocket());
+                        new Thread(writer).start();
+                        new Thread(new TimeOutChecker()).start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        closeChannel();
+                        return;
+                    }
+                    ConnectManager.getInstance().registerClientChannel("INIT", this);
                     writer.offerData(id + "OK^");
                 }
             } else if (receiveData.startsWith("#") && receiveData.length() > 3) {
@@ -139,11 +107,8 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                 PacketBindData pb = mBindDataMap.get(id);
                 if (pb != null) {
                     if (pb.mListener != null) {
-                        int endIndex = receiveData.indexOf("^");
-                        if (endIndex > 3) {
-                            String result = receiveData.substring(3, endIndex);
-                            pb.mListener.onSuccess(result);
-                        }
+                        String result = receiveData.substring(3);
+                        pb.mListener.onSuccess(result);
                     }
                     mBindDataMap.remove(id);
                 }

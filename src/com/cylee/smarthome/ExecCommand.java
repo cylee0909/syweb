@@ -1,7 +1,9 @@
 package com.cylee.smarthome;
 
 import com.cylee.smarthome.model.BaseModel;
+import com.cylee.smarthome.model.CommandModel;
 import com.cylee.smarthome.model.ExecMode;
+import com.cylee.smarthome.util.Rc4Util;
 import com.cylee.socket.tcp.ConnectManager;
 import com.cylee.socket.tcp.DataChannel;
 import com.cylee.socket.tcp.SendDataListener;
@@ -29,18 +31,20 @@ public class ExecCommand extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setCharacterEncoding("utf-8");
-        String id = req.getParameter("appid");
+        String time = req.getParameter("t");
+        String sign = req.getParameter("s");
         BaseModel result = null;
-        if (id != null && !"".equals(id)) {
-            DataChannel channel = ConnectManager.getInstance().getChannel(id);
+        if (sign != null && sign.equals(Rc4Util.quickEncry(time))) {
+            DataChannel channel = ConnectManager.getInstance().getChannel("INIT");
             if (channel != null) {
                 String command = req.getParameter("command");
+                String params = req.getParameter("params");
                 final AsyncContext context = req.startAsync();
-                Log.d("exec command = "+command);
-                channel.sendString("EXEC_" + command, new SendDataListener() {
+                Log.d("exec command = " + command);
+                channel.sendString(CommandModel.create(command, params), new SendDataListener() {
                     @Override
                     public void onError(int errorCode) {
-                        Log.d("exec command = "+command+" error = "+errorCode);
+                        Log.d("exec command = " + command + " error = " + errorCode);
                         try {
                             PrintWriter wirter = context.getResponse().getWriter();
                             ExecMode mode = new ExecMode();
@@ -55,7 +59,7 @@ public class ExecCommand extends HttpServlet {
 
                     @Override
                     public void onSuccess(String data) {
-                        Log.d("exec command = "+command+" response = "+data);
+                        Log.d("exec command = " + command + " response = " + data);
                         try {
                             PrintWriter wirter = context.getResponse().getWriter();
                             ExecMode mode = new ExecMode();
