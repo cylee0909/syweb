@@ -1,12 +1,20 @@
 package com.cylee.socket.tcp;
 
+import com.cylee.web.Log;
+import push.AndroidNotification;
+import push.PushClient;
+import push.android.AndroidCustomizedcast;
+
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by cylee on 16/9/25.
  */
 public class DataChannel implements TcpSocketReader.ReadListener{
+    private ExecutorService mExecutor = Executors.newCachedThreadPool();
     private static final int DEFAULT_TIMEOUT = 6000; // 5s
     private static final int ERROR_DATA_INVALID = -1;
     private static final int ERROR_SEND_ERROR = -2;
@@ -112,6 +120,38 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                     }
                     mBindDataMap.remove(id);
                 }
+            } else if (receiveData.startsWith("PUSH")) {
+                String id = receiveData.substring(4,6);
+                String tokens = receiveData.substring(6);
+                Log.d("push id = "+id+" tokens = "+tokens);
+                if (tokens != null) {
+                    String[] tokenItem = tokens.split(":");
+                    if (tokenItem != null) {
+                        for (String token : tokenItem) {
+                            mExecutor.submit(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        Log.d("start push to token "+token);
+                                        AndroidCustomizedcast customizedcast = new AndroidCustomizedcast("58ce7460f29d984a1100065f", "qjyas7bhncphrtqpnemwn5p4autfphsn");
+                                        customizedcast.setAlias(token, "SELF_ALIAS");
+                                        customizedcast.setTicker("警报!");
+                                        customizedcast.setTitle("警报");
+                                        customizedcast.setText("有设备出现异常,请及时处理!");
+                                        customizedcast.goAppAfterOpen();
+                                        customizedcast.setDisplayType(AndroidNotification.DisplayType.NOTIFICATION);
+                                        customizedcast.setProductionMode();
+                                        PushClient client = new PushClient(token);
+                                        client.send(customizedcast);
+                                    } catch (Exception e){
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+                writer.offerData(id + "OK^");
             }
         }
     }
