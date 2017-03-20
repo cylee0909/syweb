@@ -13,4 +13,9 @@ public class AndroidUnicast extends AndroidNotification {
     	setPredefinedKeyValue("device_tokens", token);
     }
 
+	public void setAlias(String alias,String aliasType) throws Exception {
+		setPredefinedKeyValue("alias", alias);
+		setPredefinedKeyValue("alias_type", aliasType);
+	}
+
 }

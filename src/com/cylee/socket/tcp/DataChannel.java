@@ -4,6 +4,7 @@ import com.cylee.web.Log;
 import push.AndroidNotification;
 import push.PushClient;
 import push.android.AndroidCustomizedcast;
+import push.android.AndroidUnicast;
 
 import java.io.IOException;
 import java.util.*;
@@ -138,6 +139,7 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                                         customizedcast.setTicker("警报!");
                                         customizedcast.setTitle("警报");
                                         customizedcast.setText("有设备出现异常,请及时处理!");
+                                        customizedcast.setBuilderId(0);
                                         customizedcast.goAppAfterOpen();
                                         customizedcast.setDisplayType(AndroidNotification.DisplayType.NOTIFICATION);
                                         customizedcast.setProductionMode();
