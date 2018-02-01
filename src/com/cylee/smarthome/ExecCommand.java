@@ -50,7 +50,6 @@ public class ExecCommand extends HttpServlet {
                             ExecMode mode = new ExecMode();
                             mode.setErrorCode(errorCode);
                             wirter.write(BaseModel.buildSuccess(mode).toJson());
-                            wirter.flush();
                             context.complete();
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -66,7 +65,6 @@ public class ExecCommand extends HttpServlet {
                             mode.setErrorCode(0);
                             mode.setResult(data);
                             wirter.write(BaseModel.buildSuccess(mode).toJson());
-                            wirter.flush();
                             context.complete();
                         } catch (IOException e) {
                             e.printStackTrace();

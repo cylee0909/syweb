@@ -7,12 +7,12 @@ import com.cylee.smarthome.util.GsonBuilderFactory;
  */
 public class CommandModel {
     public String command;
-    public String params;
+    public String _params;
 
     public static String create(String command, String params) {
         CommandModel model = new CommandModel();
         model.command = command;
-        model.params = params;
+        model._params = params;
         return GsonBuilderFactory.createBuilder().toJson(model);
     }
 }
