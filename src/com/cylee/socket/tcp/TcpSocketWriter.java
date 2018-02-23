@@ -41,7 +41,7 @@ public class TcpSocketWriter implements Runnable{
             }
         }
         try {
-            mDatas.put("end");
+            mDatas.put("__end__");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,7 +63,7 @@ public class TcpSocketWriter implements Runnable{
                     }
                 }
                 String packet = mDatas.take();
-                if (packet != null && !"end".equals(packet)) {
+                if (packet != null && !"__end__".equals(packet)) {
                     mBW.write(packet);
                     mBW.newLine();
                     mBW.flush();

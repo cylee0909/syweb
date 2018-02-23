@@ -154,6 +154,10 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                     }
                 }
                 writer.offerData(id + "OK^");
+            } else if (receiveData.startsWith("Ping")){
+                writer.offerData("Pong");
+            } else {
+                writer.offerData("OK^");
             }
         }
     }
